@@ -1,0 +1,31 @@
+version: "1"
+
+package:
+  id: info.smplayer.smplayer
+  name: SMPlayer
+  version: 25.6.0.0
+  kind: app
+  description: |
+    Free Media Player for Windows, Linux and Mac OS with YouTube support.
+  author: wurongjie@deepin.org
+
+command: [smplayer]
+
+base: org.deepin.base/25.2.1
+
+build: |
+  chmod +x linglong/sources/SMPlayer.AppImage
+  cd $PREFIX
+  /project/linglong/sources/SMPlayer.AppImage --appimage-extract
+  mv squashfs-root/usr/* $PREFIX/
+  strip $PREFIX/bin/smplayer
+  mv share/applications/smplayer.desktop share/applications/$LINGLONG_APPID.desktop
+  sed -i "s|Icon=smplayer|Icon=$LINGLONG_APPID|g" share/applications/$LINGLONG_APPID.desktop
+  mv share/icons/hicolor/scalable/apps/smplayer.svg share/icons/hicolor/scalable/apps/$LINGLONG_APPID.svg
+  rm -r squashfs-root
+
+sources:
+  - kind: file
+    url: https://gh-proxy.org/https://github.com/smplayer-dev/smplayer/releases/download/v25.6.0/SMPlayer-25.6.0-x86_64.AppImage
+    digest: 04b891f013e42c1f92620acf5be57556ac37b973a3aab53489aff58231679794
+    name: SMPlayer.AppImage
