@@ -1,6 +1,5 @@
 #!/bin/bash
 set -e
-
 # 颜色输出
 RED='\033[0;31m'
 GREEN='\033[0;32m'
@@ -48,6 +47,13 @@ update_yaml_file() {
     sed -i "\#url:.*$repo#{n;s/.*/    digest: $new_digest/}" linglong.yaml
 }
 
+update_yaml_version() {
+    local new_version=$1
+    local t=$(date +%m%d)
+    log "更新版本号: $new_version"
+    sed -i "s|  version:.*|  version: $new_version.$t|" linglong.yaml
+}
+
 GITHUB_OUTPUT=${GITHUB_OUTPUT:-/tmp/output.txt}
 main(){
     local repo=$1
@@ -69,6 +75,9 @@ main(){
         local proxy_url="https://gh-proxy.org/$download_url"
         log "更新linglong.yaml"
         update_yaml_file $repo $proxy_url $new_digest
+        # 更新版本号
+        version=`curl https://api.github.com/repos/$repo/releases/latest | jq -r '.tag_name' | grep -o '[0-9]*\.[0-9]*\.[0-9]*'`
+        update_yaml_version $version
     fi
     if [ "$has_changes" = true ]; then
         log "检测到更新，文件已修改"
